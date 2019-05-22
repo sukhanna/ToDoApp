@@ -15,10 +15,10 @@ namespace ToDoApp.Controllers
     public class ToDoController : Controller
     {
         public IToDoItemService _todoItemService;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<IdentityUser> _userManager;
 
         public ToDoController(IToDoItemService todoItemService,
-        UserManager<ApplicationUser> userManager)
+        UserManager<IdentityUser> userManager)
         {
             _todoItemService = todoItemService;
             _userManager = userManager;
