@@ -5,6 +5,7 @@ using System.Linq;
 using ToDoApp.Models;
 using ToDoApp.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 namespace ToDoApp.Services
 {
@@ -17,24 +18,25 @@ namespace ToDoApp.Services
             _context = context;
         }
 
-        async Task<ToDoItem[]> IToDoItemService.GetIncompleteItemsAsync() => await _context.Items
-            .Where(x => !x.IsDone)
+        async Task<ToDoItem[]> IToDoItemService.GetIncompleteItemsAsync(IdentityUser user) => await _context.Items
+            .Where(x => !x.IsDone && x.UserId == user.Id)
             .ToArrayAsync();
 
-        public async Task<bool> AddItemAsync(ToDoItem newItem)
+        public async Task<bool> AddItemAsync(ToDoItem newItem, IdentityUser user)
         {
             newItem.Id = Guid.NewGuid();
             newItem.IsDone = false;
             newItem.DueAt = DateTimeOffset.Now.AddDays(3);
+            newItem.UserId = user.Id;
             _context.Items.Add(newItem);
             var saveResult = await _context.SaveChangesAsync();
             return saveResult == 1;
         }
 
-        public async Task<bool> MarkDoneAsync(Guid id)
+        public async Task<bool> MarkDoneAsync(Guid id, IdentityUser user)
         {
             var item = await _context.Items
-            .Where(x => x.Id == id)
+            .Where(x => x.Id == id && x.UserId == user.Id)
             .SingleOrDefaultAsync();
             if (item == null) return false;
             item.IsDone = true;
